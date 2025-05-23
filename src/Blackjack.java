@@ -56,9 +56,6 @@ public class Blackjack {
     int cardWidth = 110;
     int cardHeight = 154;
 
-    int playerscore = 1000;
-    int dealerscore = 1000;
-
     JFrame frame = new JFrame("Blackjack - 6:5");
     Boolean dealercardhidden = true;
     Boolean initwagerplaced = false;
@@ -68,47 +65,34 @@ public class Blackjack {
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
 
-            while (initwagerplaced = false) {
-                Image hiddenCardImg = new ImageIcon(getClass().getResource("./cards/BACK.png")).getImage();
-                g.drawImage(hiddenCardImg, 20, 20, cardWidth, cardHeight, null);
+            if (initwagerplaced) {
+                try {
+                    if (dealercardhidden) {
+                        Image hiddenCardImg = new ImageIcon(getClass().getResource("./cards/BACK.png")).getImage();
+                        g.drawImage(hiddenCardImg, 20, 20, cardWidth, cardHeight, null);
+                    } else {
+                        Card card = hiddenCard;
+                        Image faceuphiddencard = new ImageIcon(getClass().getResource(card.getImagePath())).getImage();
+                        g.drawImage(faceuphiddencard, 20, 20, cardWidth, cardHeight, null);
+                    }
+                    for (int i = 0; i < dealerHand.size(); i++) {
+                        Card card = dealerHand.get(i);
+                        Image cardImg = new ImageIcon(getClass().getResource(card.getImagePath())).getImage();
+                        g.drawImage(cardImg, cardWidth + 25 + (cardWidth + 5) * i, 20, cardWidth, cardHeight, null);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-                for (int i = 0; i < playerHand.size(); i++) {
-                    Card card = playerHand.get(i);
-                    Image cardImg = new ImageIcon(Objects.requireNonNull(getClass().getResource(card.getImagePath()))).getImage();
-                    g.drawImage(hiddenCardImg, 25 + cardWidth * i, 526 - cardHeight, cardWidth, cardHeight, null);
+                try {
+                    for (int i = 0; i < playerHand.size(); i++) {
+                        Card card = playerHand.get(i);
+                        Image cardImg = new ImageIcon(Objects.requireNonNull(getClass().getResource(card.getImagePath()))).getImage();
+                        g.drawImage(cardImg, 25 + cardWidth * i, 526 - cardHeight, cardWidth, cardHeight, null);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                for (int i = 0; i < dealerHand.size(); i++) {
-                    Card card = dealerHand.get(i);
-                    Image cardImg = new ImageIcon(getClass().getResource(card.getImagePath())).getImage();
-                    g.drawImage(hiddenCardImg, cardWidth + 25 + (cardWidth + 5) * i, 20, cardWidth, cardHeight, null);
-                }
-            }
-            try {
-                if (dealercardhidden) {
-                    Image hiddenCardImg = new ImageIcon(getClass().getResource("./cards/BACK.png")).getImage();
-                    g.drawImage(hiddenCardImg, 20, 20, cardWidth, cardHeight, null);
-                } else {
-                    Card card = hiddenCard;
-                    Image faceuphiddencard = new ImageIcon(getClass().getResource(card.getImagePath())).getImage();
-                    g.drawImage(faceuphiddencard, 20, 20, cardWidth, cardHeight, null);
-                }
-                for (int i = 0; i < dealerHand.size(); i++) {
-                    Card card = dealerHand.get(i);
-                    Image cardImg = new ImageIcon(getClass().getResource(card.getImagePath())).getImage();
-                    g.drawImage(cardImg, cardWidth + 25 + (cardWidth + 5) * i, 20, cardWidth, cardHeight, null);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            try {
-                for (int i = 0; i < playerHand.size(); i++) {
-                    Card card = playerHand.get(i);
-                    Image cardImg = new ImageIcon(Objects.requireNonNull(getClass().getResource(card.getImagePath()))).getImage();
-                    g.drawImage(cardImg, 25 + cardWidth * i, 526 - cardHeight, cardWidth, cardHeight, null);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
 
             if (!stayButton.isEnabled()) {
@@ -117,12 +101,12 @@ public class Blackjack {
                 boolean dealerblackjack = hiddenCard.getValue() + dealerHand.get(0).getValue() == 21 &&
                         (hiddenCard.isAce() || dealerHand.get(0).isAce());
 
+                /*
                 if (playerblackjack && dealerblackjack) {
                     message = "Push - BJ";
                 } else if (playerblackjack) {
                     message = "Player Wins - BJ";
-                    dealerscore -= 50;
-                    playerscore += 50;
+                    playerstack *= 1.2;
                 } else if (dealerblackjack) {
                     message = "Dealer Wins - BJ";
                     playerscore -= 50;
@@ -146,14 +130,14 @@ public class Blackjack {
                     playerscore -= 50;
                     dealerscore += 50;
                 }
+                 */
                 g.setFont(new Font("Arial", Font.PLAIN, 30));
                 g.setColor(Color.white);
                 g.drawString(message, 220, (boardHeight / 2) - 30);
             }
             g.setFont(new Font("Arial", Font.PLAIN, 20));
             g.setColor(Color.white);
-            g.drawString("Playerscore: " + playerscore, 25, (boardHeight / 2) + 15);
-            g.drawString("Dealerscore: " + dealerscore, 25, (boardHeight / 2) - 7);
+            g.drawString("Player Stack: " + playerstack, 25, (boardHeight / 2) + 15);
 
         }
     };
@@ -163,9 +147,9 @@ public class Blackjack {
     JButton stayButton = new JButton("Stay");
     JButton newgamebutton = new JButton("New Game");
 
-    public Blackjack() {
+    public Blackjack(int playerstack) {
         startGame();
-
+        playerstack = 0;
         frame.setVisible(true);
         frame.setSize(boardWidth, boardHeight);
         frame.setLocationRelativeTo(null);
@@ -186,7 +170,14 @@ public class Blackjack {
 
         String initwager = JOptionPane.showInputDialog(null, "Enter your initial wager");
         if (initwager != null) {
+            try {
+                playerstack = Integer.parseInt(initwager);
+                System.out.println("You entered: " + playerstack);
+            } catch (NumberFormatException e) {
+                initwager = JOptionPane.showInputDialog("That's not a valid number, reenter");
+            }
             initwagerplaced = true;
+            gamePanel.repaint();
         }
         hitButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -284,6 +275,6 @@ public class Blackjack {
     }
 
     public static void main(String[] args) {
-        new Blackjack();
+        new Blackjack(0);
     }
 }
