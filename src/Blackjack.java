@@ -317,16 +317,13 @@ public class Blackjack {
                     dealercardhidden = false;
                     hitButton.setEnabled(false);
                     stayButton.setEnabled(false);
-
-                    while (dealerSum < 17) {
                         Card card = deck.remove(deck.size() - 1);
-                        dealerSum += card.getValue();
-                        dealerAceCount += card.isAce() ? 1 : 0;
-                        dealerHand.add(card);
-                        while (dealerSum > 21 && dealerAceCount > 0) {
-                            dealerSum -= 10;
-                            dealerAceCount--;
-                        }
+                        playerSum += card.getValue();
+                        playerAceCount += card.isAce() ? 1 : 0;
+                        playerHand.add(card);
+                        while (playerSum > 21 && dealerAceCount > 0) {
+                            playerSum -= 10;
+                            playerAceCount--;
                     }
                     evaluateResult();
                     gamePanel.repaint();
